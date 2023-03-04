@@ -20,6 +20,7 @@ Betweenness::Betweenness(const Graph &G, bool normalized, bool computeEdgeCentra
     : Centrality(G, normalized, computeEdgeCentrality) {}
 
 void Betweenness::run() {
+    std::cout << "Running single threaded betweeness\n";
     Aux::SignalHandler handler;
     const count z = G.upperNodeIdBound();
     scoreData.clear();
