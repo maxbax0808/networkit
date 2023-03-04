@@ -32,14 +32,14 @@ void Betweenness::run() {
 
     std::vector<std::vector<double>> dependencies(omp_get_max_threads(), std::vector<double>(z));
     std::vector<std::unique_ptr<SSSP>> sssps;
-    sssps.resize(omp_get_max_threads());
-#pragma omp parallel
+    sssps.resize(1);
+//#pragma omp parallel
     {
-        omp_index i = omp_get_thread_num();
+        //omp_index i = omp_get_thread_num();
         if (G.isWeighted())
-            sssps[i] = std::unique_ptr<SSSP>(new Dijkstra(G, 0, true, true));
+            sssps[0] = std::unique_ptr<SSSP>(new Dijkstra(G, 0, true, true));
         else
-            sssps[i] = std::unique_ptr<SSSP>(new BFS(G, 0, true, true));
+            sssps[0] = std::unique_ptr<SSSP>(new BFS(G, 0, true, true));
     }
 
     auto computeDependencies = [&](node s) -> void {
@@ -91,8 +91,8 @@ void Betweenness::run() {
         G.parallelForNodes([&](node u) { scoreData[u] /= pairs; });
 
         if (computeEdgeCentrality) {
-#pragma omp parallel for
-            for (omp_index i = 0; i < static_cast<omp_index>(edgeScoreData.size()); ++i) {
+//#pragma omp parallel for
+            for (int i = 0; i < edgeScoreData.size(); ++i) {
                 edgeScoreData[i] = edgeScoreData[i] / edges;
             }
         }
