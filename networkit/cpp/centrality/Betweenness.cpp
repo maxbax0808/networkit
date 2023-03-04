@@ -31,15 +31,14 @@ void Betweenness::run() {
     }
 
     std::vector<std::vector<double>> dependencies(1, std::vector<double>(z));
-    std::vector<std::unique_ptr<SSSP>> sssps;
-    sssps.resize(1);
+    std::unique_ptr<SSSP> ssps;
 //#pragma omp parallel
     {
         //omp_index i = omp_get_thread_num();
         if (G.isWeighted())
-            sssps[0] = std::unique_ptr<SSSP>(new Dijkstra(G, 0, true, true));
+            ssps = std::unique_ptr<SSSP>(new Dijkstra(G, 0, true, true));
         else
-            sssps[0] = std::unique_ptr<SSSP>(new BFS(G, 0, true, true));
+            ssps = std::unique_ptr<SSSP>(new BFS(G, 0, true, true));
     }
 
     auto computeDependencies = [&](node s) -> void {
@@ -47,7 +46,7 @@ void Betweenness::run() {
         std::fill(dependency.begin(), dependency.end(), 0);
 
         // run SSSP algorithm and keep track of everything
-        auto &sssp = *sssps[0];
+        auto &sssp = *ssps;
         sssp.setSource(s);
         if (!handler.isRunning())
             return;
