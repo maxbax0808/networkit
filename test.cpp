@@ -1,11 +1,11 @@
 #include <iostream>
 #include <networkit/graph/Graph.hpp>
 #include <networkit/centrality/Betweenness.hpp>
-#include <networkit/io/GraphIO.hpp>
+#include <networkit/io/METISGraphReader.hpp>
 
 int main() {
     // Load the graph from a file
-    NetworKit::Graph G = NetworKit::GraphIO::readGraph("../instances/105.txt", NetworKit::FileType::METIS);
+    NetworKit::Graph G = NetworKit::METISGraphReader::read("../instances/105.txt");
 
     // Calculate the betweenness centrality
     NetworKit::Betweenness centrality(G);
