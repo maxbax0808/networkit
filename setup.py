@@ -150,7 +150,7 @@ def buildNetworKit(install_prefix, externalCore=False, externalTlx=None, withTes
 		pass
 	# Build cmake call
 	abs_prefix = os.path.join(os.getcwd(), install_prefix)
-	comp_cmd = ["cmake","-DCMAKE_BUILD_TYPE=Release"]
+	comp_cmd = ["cmake","-DCMAKE_BUILD_TYPE=Debug"]
 	comp_cmd.append("-DCMAKE_INSTALL_PREFIX="+abs_prefix)
 	comp_cmd.append("-DCMAKE_CXX_COMPILER="+cmakeCompiler)
 	comp_cmd.append("-DNETWORKIT_FLATINSTALL=ON")
