@@ -30,7 +30,7 @@ void Betweenness::run() {
         edgeScoreData.resize(z2);
     }
 
-    std::vector<std::vector<double>> dependencies(omp_get_max_threads(), std::vector<double>(z));
+    std::vector<std::vector<double>> dependencies(1, std::vector<double>(z));
     std::vector<std::unique_ptr<SSSP>> sssps;
     sssps.resize(1);
 //#pragma omp parallel
@@ -43,11 +43,11 @@ void Betweenness::run() {
     }
 
     auto computeDependencies = [&](node s) -> void {
-        std::vector<double> &dependency = dependencies[omp_get_thread_num()];
+        std::vector<double> &dependency = dependencies[0];
         std::fill(dependency.begin(), dependency.end(), 0);
 
         // run SSSP algorithm and keep track of everything
-        auto &sssp = *sssps[omp_get_thread_num()];
+        auto &sssp = *sssps[0];
         sssp.setSource(s);
         if (!handler.isRunning())
             return;
