@@ -14,7 +14,7 @@ int main() {
     auto scores = centrality.scores();
 
     // Print the betweenness centrality scores
-    for (NetworKit::node v = 0; v < G.numberOfNodes(); ++v) {
+    for (NetworKit::node v = 0; v < 10; ++v) {
         std::cout << "Betweenness centrality of node " << v << ": " << scores[v] << std::endl;
     }
 
