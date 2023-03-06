@@ -5,8 +5,8 @@
 
 int main() {
     // Load the graph from a file
-    auto reader = NetworKit::METISGraphReader;
-    NetworKit::Graph G = reader.read("../instances/105.txt");
+    auto reader = NetworKit::METISGraphReader();
+    NetworKit::Graph G = reader.read("../instances/104.txt");
 
     // Calculate the betweenness centrality
     NetworKit::Betweenness centrality(G);
