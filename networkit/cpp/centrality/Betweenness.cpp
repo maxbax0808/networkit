@@ -6,7 +6,6 @@
  */
 
 #include <memory>
-#include <omp.h>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/SignalHandling.hpp>
@@ -33,19 +32,16 @@ void Betweenness::run() {
 
     std::vector<std::vector<double>> dependencies(1, std::vector<double>(z));
     std::unique_ptr<SSSP> ssps;
-#pragma omp parallel
-    {
-        //omp_index i = omp_get_thread_num();
-        if (G.isWeighted())
-            ssps = std::unique_ptr<SSSP>(new Dijkstra(G, 0, true, true));
-        else
-            ssps = std::unique_ptr<SSSP>(new BFS(G, 0, true, true));
-    }
-    std::cout << "Getting to line 44\n";
+
+    if (G.isWeighted())
+        ssps = std::unique_ptr<SSSP>(new Dijkstra(G, 0, true, true));
+    else
+        ssps = std::unique_ptr<SSSP>(new BFS(G, 0, true, true));
+    
+    //std::cout << "Getting to line 44\n";
     auto computeDependencies = [&](node s) -> void {
         std::vector<double> &dependency = dependencies[0];
         std::fill(dependency.begin(), dependency.end(), 0);
-        std::cout << "Getting to line 48\n";
 
         // run SSSP algorithm and keep track of everything
         auto &sssp = *ssps;
@@ -55,7 +51,7 @@ void Betweenness::run() {
         sssp.run();
         if (!handler.isRunning())
             return;
-        std::cout << "Getting to line 58\n";
+            
         // compute dependencies for nodes in order of decreasing distance from s
         std::vector<node> stack = sssp.getNodesSortedByDistance();
         while (!stack.empty()) {
@@ -71,20 +67,17 @@ void Betweenness::run() {
 
                 if (computeEdgeCentrality) {
                     const edgeid edgeId = G.edgeId(p, t);
-#pragma omp atomic
                     edgeScoreData[edgeId] += c;
                 }
             }
 
             if (t != s)
-#pragma omp atomic
                 scoreData[t] += dependency[t];
         }
     };
     handler.assureRunning();
     G.balancedParallelForNodes(computeDependencies);
     handler.assureRunning();
-    std::cout << "Getting to line 85\n";
 
     if (normalized) {
         // divide by the number of possible pairs
@@ -92,10 +85,8 @@ void Betweenness::run() {
         const double pairs = (n - 2.) * (n - 1.);
         const double edges = n * (n - 1.);
         G.parallelForNodes([&](node u) { scoreData[u] /= pairs; });
-        std::cout << "Getting to line 93\n";
 
         if (computeEdgeCentrality) {
-//#pragma omp parallel for
             for (size_t i = 0; i < edgeScoreData.size(); ++i) {
                 edgeScoreData[i] = edgeScoreData[i] / edges;
             }

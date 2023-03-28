@@ -2376,7 +2376,7 @@ void Graph::forNodes(L handle) const {
 
 template <typename L>
 void Graph::parallelForNodes(L handle) const {
-#pragma omp parallel for
+//#pragma omp parallel for
     for (omp_index v = 0; v < static_cast<omp_index>(z); ++v) {
         if (exists[v]) {
             handle(v);
@@ -2410,7 +2410,7 @@ void Graph::forNodesInRandomOrder(L handle) const {
 template <typename L>
 void Graph::balancedParallelForNodes(L handle) const {
 // TODO: define min block size (and test it!)
-#pragma omp parallel for schedule(guided)
+//#pragma omp parallel for schedule(guided)
     for (omp_index v = 0; v < static_cast<omp_index>(z); ++v) {
         if (exists[v]) {
             handle(v);
@@ -2433,7 +2433,7 @@ void Graph::forNodePairs(L handle) const {
 
 template <typename L>
 void Graph::parallelForNodePairs(L handle) const {
-#pragma omp parallel for schedule(guided)
+//#pragma omp parallel for schedule(guided)
     for (omp_index u = 0; u < static_cast<omp_index>(z); ++u) {
         if (exists[u]) {
             for (node v = u + 1; v < z; ++v) {
@@ -2555,7 +2555,7 @@ inline void Graph::forEdgeImpl(L handle) const {
 
 template <bool graphIsDirected, bool hasWeights, bool graphHasEdgeIds, typename L>
 inline void Graph::parallelForEdgesImpl(L handle) const {
-#pragma omp parallel for schedule(guided)
+//#pragma omp parallel for schedule(guided)
     for (omp_index u = 0; u < static_cast<omp_index>(z); ++u) {
         forOutEdgesOfImpl<graphIsDirected, hasWeights, graphHasEdgeIds, L>(u, handle);
     }
