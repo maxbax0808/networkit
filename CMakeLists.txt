@@ -55,7 +55,7 @@ endif()
 ################################################################################
 # Compilation Flags
 set(NETWORKIT_CXX_FLAGS "")
-set(NETWORKIT_LINK_FLAGS "")
+set(NETWORKIT_LINK_FLAGS "-ltbb")
 
 if (NETWORKIT_QUIET_LOGGING)
 	set(NETWORKIT_CXX_FLAGS "-DNETWORKIT_QUIET_LOGGING")

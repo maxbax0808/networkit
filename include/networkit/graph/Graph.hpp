@@ -11,6 +11,7 @@
 #define NETWORKIT_GRAPH_GRAPH_HPP_
 
 #include <algorithm>
+#include <execution>
 #include <fstream>
 #include <functional>
 #include <iostream>
@@ -2241,13 +2242,19 @@ void Graph::forNodesInRandomOrder(L handle) const {
 
 template <typename L>
 void Graph::balancedParallelForNodes(L handle) const {
-// TODO: define min block size (and test it!)
-#pragma omp parallel for schedule(guided)
+    // TODO: define min block size (and test it!)
+    std::cout << "using std now to calculate\n";
+
+    std::vector<omp_index> indices;
     for (omp_index v = 0; v < static_cast<omp_index>(z); ++v) {
         if (exists[v]) {
-            handle(v);
+            indices.push_back(v);
         }
     }
+
+    std::for_each(std::execution::par, indices.begin(), indices.end(), [&](omp_index v) {
+        handle(v);
+    });
 }
 
 template <typename L>

@@ -8,6 +8,7 @@
 
 #include <memory>
 #include <omp.h>
+#include <mutex>
 
 #include <networkit/centrality/Betweenness.hpp>
 #include <networkit/auxiliary/Log.hpp>
@@ -42,6 +43,7 @@ void Betweenness::run() {
         else
             sssps[i] = std::unique_ptr<SSSP>(new BFS(G, 0, true, true));
     }
+    std::mutex edgemutex, scoremutex, dependencymutex;
 
     auto computeDependencies = [&](node s) -> void {
 
@@ -56,6 +58,7 @@ void Betweenness::run() {
         if (!handler.isRunning()) return;
         // compute dependencies for nodes in order of decreasing distance from s
         std::vector<node> stack = sssp.getNodesSortedByDistance();
+        
         while (!stack.empty()) {
             node t = stack.back();
             stack.pop_back();
@@ -65,22 +68,32 @@ void Betweenness::run() {
                 double weight;
                 tmp.ToDouble(weight);
                 double c= weight * (1 + dependency[t]);
+                dependencymutex.lock();
                 dependency[p] += c;
+                dependencymutex.unlock();
 
                 if (computeEdgeCentrality) {
                     const edgeid edgeId = G.edgeId(p, t);
-#pragma omp atomic
+//#pragma omp atomic
+                    edgemutex.lock();
                     edgeScoreData[edgeId] += c;
+                    edgemutex.unlock();
+                    std::cout << "Problem after mutex\n";
                 }
             }
 
-            if (t != s)
-#pragma omp atomic
+            if (t != s){
+//#pragma omp atomic
+                scoremutex.lock();
                 scoreData[t] += dependency[t];
+                std::cout << "Problem after mutex\n";
+                scoremutex.unlock();
+            }
         }
     };
     handler.assureRunning();
     G.balancedParallelForNodes(computeDependencies);
+    std::cout << "problem after parallel\n";
     handler.assureRunning();
 
     if (normalized) {
