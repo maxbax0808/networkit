@@ -32,30 +32,30 @@ void Betweenness::run() {
         edgeScoreData.resize(z2);
     }
 
-    std::vector<std::vector<double>> dependencies(omp_get_max_threads(), std::vector<double>(z));
-    std::vector<std::unique_ptr<SSSP>> sssps;
-    sssps.resize(omp_get_max_threads());
-#pragma omp parallel
-    {
-        omp_index i = omp_get_thread_num();
-        if (G.isWeighted())
-            sssps[i] = std::unique_ptr<SSSP>(new Dijkstra(G, 0, true, true));
-        else
-            sssps[i] = std::unique_ptr<SSSP>(new BFS(G, 0, true, true));
-    }
+     std::vector<std::vector<double>> dependencies(1, std::vector<double>(z));
+    std::unique_ptr<SSSP> ssps;
+
+    if (G.isWeighted())
+        ssps = std::unique_ptr<SSSP>(new Dijkstra(G, 0, true, true));
+    else
+        ssps = std::unique_ptr<SSSP>(new BFS(G, 0, true, true));
+    
     std::mutex edgemutex, scoremutex, dependencymutex;
 
-    auto computeDependencies = [&](node s) -> void {
+    std::cout << "sanity check\n";
 
-        std::vector<double> &dependency = dependencies[omp_get_thread_num()];
+    auto computeDependencies = [&](node s) -> void {
+std::vector<double> &dependency = dependencies[0];
         std::fill(dependency.begin(), dependency.end(), 0);
 
         // run SSSP algorithm and keep track of everything
-        auto &sssp = *sssps[omp_get_thread_num()];
+        auto &sssp = *ssps;
         sssp.setSource(s);
-        if (!handler.isRunning()) return;
+        if (!handler.isRunning())
+            return;
         sssp.run();
-        if (!handler.isRunning()) return;
+        if (!handler.isRunning())
+            return;
         // compute dependencies for nodes in order of decreasing distance from s
         std::vector<node> stack = sssp.getNodesSortedByDistance();
         
@@ -78,7 +78,7 @@ void Betweenness::run() {
                     edgemutex.lock();
                     edgeScoreData[edgeId] += c;
                     edgemutex.unlock();
-                    std::cout << "Problem after mutex\n";
+                    //std::cout << "Problem after mutex\n";
                 }
             }
 
@@ -86,10 +86,11 @@ void Betweenness::run() {
 //#pragma omp atomic
                 scoremutex.lock();
                 scoreData[t] += dependency[t];
-                std::cout << "Problem after mutex\n";
+                //std::cout << "Problem after mutex\n";
                 scoremutex.unlock();
             }
         }
+        //std::cout << "sanity check 2\n";
     };
     handler.assureRunning();
     G.balancedParallelForNodes(computeDependencies);

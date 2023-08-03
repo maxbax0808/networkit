@@ -2243,16 +2243,14 @@ void Graph::forNodesInRandomOrder(L handle) const {
 template <typename L>
 void Graph::balancedParallelForNodes(L handle) const {
     // TODO: define min block size (and test it!)
-    std::cout << "using std now to calculate\n";
-
-    std::vector<omp_index> indices;
-    for (omp_index v = 0; v < static_cast<omp_index>(z); ++v) {
+    std::vector<int64_t> mindices;
+    for (int64_t v = 0; v < static_cast<int64_t>(z); ++v) {
         if (exists[v]) {
-            indices.push_back(v);
+            mindices.push_back(v);
         }
     }
 
-    std::for_each(std::execution::par, indices.begin(), indices.end(), [&](omp_index v) {
+    std::for_each(std::execution::par_unseq, mindices.begin(), mindices.end(), [&](int64_t v) {
         handle(v);
     });
 }
