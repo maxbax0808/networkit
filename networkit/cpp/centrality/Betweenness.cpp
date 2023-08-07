@@ -32,7 +32,7 @@ void Betweenness::run() {
         edgeScoreData.resize(z2);
     }
 
-     std::vector<std::vector<double>> dependencies(1, std::vector<double>(z));
+    std::vector<std::vector<double>> dependencies(1, std::vector<double>(z));
     
     
     std::mutex edgemutex, scoremutex, dependencymutex;
@@ -40,15 +40,15 @@ void Betweenness::run() {
     std::cout << "sanity check\n";
 
     auto computeDependencies = [&](node s) -> void {
-std::vector<double> &dependency = dependencies[0];
+        std::vector<double> &dependency = dependencies[0];
         std::fill(dependency.begin(), dependency.end(), 0);
 
         std::unique_ptr<SSSP> ssps;
 
-    if (G.isWeighted())
-        ssps = std::unique_ptr<SSSP>(new Dijkstra(G, 0, true, true));
-    else
-        ssps = std::unique_ptr<SSSP>(new BFS(G, 0, true, true));
+        if (G.isWeighted())
+            ssps = std::unique_ptr<SSSP>(new Dijkstra(G, 0, true, true));
+        else
+            ssps = std::unique_ptr<SSSP>(new BFS(G, 0, true, true));
 
         // run SSSP algorithm and keep track of everything
         auto &sssp = *ssps;
