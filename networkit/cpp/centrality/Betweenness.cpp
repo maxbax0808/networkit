@@ -35,9 +35,9 @@ void Betweenness::run() {
     //std::vector<std::vector<double>> dependencies(1, std::vector<double>(z));
     
     
-    std::mutex edgemutex, scoremutex, dependencymutex;
+    std::mutex edgemutex, scoremutex;
 
-    std::cout << "sanity check\n";
+    //std::cout << "sanity check\n";
 
     auto computeDependencies = [&](node s) -> void {
         std::vector<double> dependency(z);// = dependencies[0];
@@ -70,9 +70,7 @@ void Betweenness::run() {
                 double weight;
                 tmp.ToDouble(weight);
                 double c= weight * (1 + dependency[t]);
-                dependencymutex.lock();
                 dependency[p] += c;
-                dependencymutex.unlock();
 
                 if (computeEdgeCentrality) {
                     const edgeid edgeId = G.edgeId(p, t);
@@ -96,7 +94,7 @@ void Betweenness::run() {
     };
     handler.assureRunning();
     G.balancedParallelForNodes(computeDependencies);
-    std::cout << "problem after parallel\n";
+    //std::cout << "problem after parallel\n";
     handler.assureRunning();
 
     if (normalized) {
